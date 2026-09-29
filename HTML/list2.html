@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do-List</title>
+</head>
+<body>
+    <h1>To-Do List</h1>
+
+    <input type="text" id="task" placeholder="Enter task">
+    <button onclick="addTask()">Add Task</button>
+
+    <ul id="taskList"></ul>
+
+    <script>
+        // --- Load tasks when page opens ---
+        document.addEventListener("DOMContentLoaded", loadTasks);
+
+        function saveTasks() {
+            const tasks = [];
+            const items = document.querySelectorAll('#taskList li span');
+
+            items.forEach(span => tasks.push(span.textContent));
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            const saved = JSON.parse(localStorage.getItem("tasks")) || [];
+            saved.forEach(text => createTaskElement(text));
+        }
+
+        function addTask() {
+            const task = document.getElementById('task').value.trim();
+            if (task !== '') {
+                createTaskElement(task);
+                saveTasks();
+                document.getElementById('task').value = '';
+            }
+        }
+
+        function createTaskElement(text) {
+            const li = document.createElement('li');
+
+            const span = document.createElement('span');
+            span.textContent = text;
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+
+            // DELETE FUNCTION
+            deleteBtn.onclick = function () {
+                li.remove();
+                saveTasks();
+            };
+
+            // EDIT FUNCTION
+            editBtn.onclick = function () {
+                if (editBtn.textContent === 'Edit') {
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = span.textContent;
+
+                    li.insertBefore(input, span);
+                    li.removeChild(span);
+
+                    editBtn.textContent = 'Save';
+
+                } else {
+
+                    const newText = li.querySelector('input').value;
+                    span.textContent = newText;
+
+                    li.insertBefore(span, li.querySelector('input'));
+                    li.removeChild(li.querySelector('input'));
+
+                    editBtn.textContent = 'Edit';
+
+                    saveTasks();
+                }
+            };
+
+            li.appendChild(span);
+            li.appendChild(editBtn);
+            li.appendChild(deleteBtn);
+
+            document.getElementById('taskList').appendChild(li);
+        }
+    </script>
+</body>
+</html>
